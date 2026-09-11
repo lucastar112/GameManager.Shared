@@ -34,7 +34,7 @@ namespace GameManager.Shared.Client
         };
 
         /// <summary>
-        /// Method <c>GameManagerClient</c> prepares the pipe to be used for the connection with the GameManager
+        /// Prepares the pipe to be used for the connection with the GameManager
         /// </summary>
         public GameManagerClient()
         {
@@ -42,7 +42,7 @@ namespace GameManager.Shared.Client
         }
 
         /// <summary>
-        /// Method <c>ConnectAsync</c> Tries to connect to the GameManger through a pipe
+        /// Tries to connect to the GameManger through a pipe
         /// </summary>
         public async Task ConnectAsync(CancellationToken cancellationToken = default)
         {
@@ -68,7 +68,7 @@ namespace GameManager.Shared.Client
         }
 
         /// <summary>
-        /// Method <c>GetAsync</c> asks the GameManager to send a value from the games ram located at the given resource
+        /// Asks the GameManager to send a value from the games ram located at the given resource
         /// </summary>
         public async Task<T?> GetAsync<T>(string resource, CancellationToken cancellationToken = default)
         {
@@ -91,7 +91,7 @@ namespace GameManager.Shared.Client
         }
 
         /// <summary>
-        /// Method <c>SetAsync</c> asks the GameManager to modify a value from the games ram located at the given resource
+        /// Asks the GameManager to modify a value from the games ram located at the given resource
         /// </summary>
         public async Task SetAsync<T>(string resource, T value, CancellationToken cancellationToken = default)
         {
@@ -106,7 +106,7 @@ namespace GameManager.Shared.Client
         }
 
         /// <summary>
-        /// Method <c>SendRequestAsync</c> Send's a new request to GameManager
+        /// Send's a new request to GameManager
         /// </summary>
         private async Task<IpcResponse> SendRequestAsync(IpcRequest request, CancellationToken cancellationToken)
         {
@@ -152,7 +152,7 @@ namespace GameManager.Shared.Client
         }
 
         /// <summary>
-        /// Method <c>WriteAsync</c> Send's the request to GameManager
+        /// Send's the request to GameManager
         /// </summary>
         private async Task WriteAsync(string message, CancellationToken cancellationToken)
         {
@@ -174,7 +174,7 @@ namespace GameManager.Shared.Client
         }
 
         /// <summary>
-        /// Method <c>ReceiveLoopAsync</c> Read's what GameManager sends back
+        /// Read GameManager's response
         /// </summary>
         private async Task ReceiveLoopAsync(CancellationToken cancellationToken)
         {
@@ -243,7 +243,7 @@ namespace GameManager.Shared.Client
         }
 
         /// <summary>
-        /// Method <c>IsChildRequest</c> check if request is a ping from GameManager
+        /// Check if request is a ping from GameManager
         /// </summary>
         private static bool IsChildRequest(string json)
         {
@@ -260,7 +260,7 @@ namespace GameManager.Shared.Client
         }
 
         /// <summary>
-        /// Method <c>HandleChildRequestAsync</c> answer's the ping from GameManager
+        /// Answer's the ping from GameManager
         /// </summary>
         private async Task HandleChildRequestAsync(string json, CancellationToken cancellationToken)
         {
@@ -299,7 +299,7 @@ namespace GameManager.Shared.Client
         }
 
         /// <summary>
-        /// Method <c>FailPendingRequests</c> Set's all pending requestion as "Failed"
+        /// Set's all pending requestion as "Failed"
         /// </summary>
         private void FailPendingRequests(Exception exception)
         {
@@ -311,7 +311,7 @@ namespace GameManager.Shared.Client
         }
 
         /// <summary>
-        /// Method <c>DisposeAsync</c> disposes all connection
+        /// Disposes all connection
         /// </summary>
         public async ValueTask DisposeAsync()
         {
@@ -345,7 +345,7 @@ namespace GameManager.Shared.Client
         }
 
         /// <summary>
-        /// Method <c>RegisterAsync</c> send's authentification information to the GameManager
+        /// Send's authentification information to the GameManager
         /// </summary>
         public async Task RegisterAsync(string name, CancellationToken cancellationToken = default)
         {
