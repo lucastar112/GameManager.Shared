@@ -46,20 +46,14 @@ namespace GameManager.Shared.Client
         /// </summary>
         public async Task ConnectAsync(CancellationToken cancellationToken = default)
         {
-            if (_pipe.IsConnected)
-            {
-                return;
-            }
+            if (_pipe.IsConnected) return;
 
             Console.WriteLine("Connecting to GameManager...");
             await _pipe.ConnectAsync(cancellationToken);
             Console.WriteLine("Pipe connected.");
 
             _reader = new StreamReader(_pipe, Encoding.UTF8, detectEncodingFromByteOrderMarks: false, bufferSize: 1024, leaveOpen: true);
-            _writer = new StreamWriter(_pipe, new UTF8Encoding(false), bufferSize: 1024, leaveOpen: true)
-            {
-                AutoFlush = true
-            };
+            _writer = new StreamWriter(_pipe, new UTF8Encoding(false), bufferSize: 1024, leaveOpen: true) {AutoFlush = true};
 
             _receiveCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             _receiveTask =ReceiveLoopAsync(_receiveCts.Token);
@@ -73,20 +67,9 @@ namespace GameManager.Shared.Client
         public async Task<T?> GetAsync<T>(string resource, CancellationToken cancellationToken = default)
         {
 
-            IpcResponse response = await SendRequestAsync(new IpcRequest
-                    {
-                        Operation = IpcOperation.GetResource, Resource = resource
-                    }, cancellationToken);
-
-            if (response.Value is null)
-            {
-                return default;
-            }
-
-            if (response.Value is JsonElement jsonElement)
-            {
-                return jsonElement.Deserialize<T>(JsonOptions);
-            }
+            IpcResponse response = await SendRequestAsync(new IpcRequest{Operation = IpcOperation.GetResource, Resource = resource}, cancellationToken);
+            if (response.Value is null)return default;
+            if (response.Value is JsonElement jsonElement) return jsonElement.Deserialize<T>(JsonOptions);
             return (T)response.Value;
         }
 
@@ -95,13 +78,7 @@ namespace GameManager.Shared.Client
         /// </summary>
         public async Task SetAsync<T>(string resource, T value, CancellationToken cancellationToken = default)
         {
-            await SendRequestAsync(new IpcRequest
-                {
-                    Operation = IpcOperation.SetResource,
-                    Resource = resource,
-                    Value = value
-                }, cancellationToken);
-
+            await SendRequestAsync(new IpcRequest{Operation = IpcOperation.SetResource, Resource = resource, Value = value}, cancellationToken);
             Console.WriteLine($"SET request for '{resource}' succeeded.");
         }
 
@@ -110,22 +87,14 @@ namespace GameManager.Shared.Client
         /// </summary>
         private async Task<IpcResponse> SendRequestAsync(IpcRequest request, CancellationToken cancellationToken)
         {
-            if (!_pipe.IsConnected || _reader is null || _writer is null)
-            {
-                throw new InvalidOperationException("GameManager client is not connected.");
-            }
+            if (!_pipe.IsConnected || _reader is null || _writer is null)throw new InvalidOperationException("GameManager client is not connected.");
 
             long requestId = Interlocked.Increment(ref _nextRequestId);
-
             request.RequestId = requestId;
-
             TaskCompletionSource<IpcResponse> responseSource = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-            if (!_pendingRequests.TryAdd(requestId, responseSource))
-            {
-                throw new InvalidOperationException($"Failed to register request {requestId}.");
-            }
-
+            if (!_pendingRequests.TryAdd(requestId, responseSource)) throw new InvalidOperationException($"Failed to register request {requestId}.");
+            
             try
             {
                 string requestJson = JsonSerializer.Serialize(request, JsonOptions);
@@ -134,14 +103,8 @@ namespace GameManager.Shared.Client
                 //Console.WriteLine($"Sending IPC request: {requestJson}");
 
                 await WriteAsync(requestJson, cancellationToken);
-
                 IpcResponse response = await responseSource.Task.WaitAsync(cancellationToken);
-
-                if (!response.Success)
-                {
-                    throw new GameManagerIpcException(response.Error?.Code ?? IpcErrorCodes.InternalError, response.Error?.Message ?? "GameManager request failed.");
-                }
-
+                if (!response.Success) throw new GameManagerIpcException(response.Error?.Code ?? IpcErrorCodes.InternalError, response.Error?.Message ?? "GameManager request failed.");
                 return response;
             }
 
@@ -156,11 +119,7 @@ namespace GameManager.Shared.Client
         /// </summary>
         private async Task WriteAsync(string message, CancellationToken cancellationToken)
         {
-            if (_writer is null)
-            {
-                throw new InvalidOperationException("GameManager client is not connected.");
-            }
-
+            if (_writer is null) throw new InvalidOperationException("GameManager client is not connected.");
             await _writeLock.WaitAsync(cancellationToken);
 
             try
@@ -178,11 +137,8 @@ namespace GameManager.Shared.Client
         /// </summary>
         private async Task ReceiveLoopAsync(CancellationToken cancellationToken)
         {
-            if (_reader is null)
-            {
-                return;
-            }
-
+            if (_reader is null) return;
+            
             try
             {
                 while (!cancellationToken.IsCancellationRequested)
@@ -196,11 +152,8 @@ namespace GameManager.Shared.Client
                         break;
                     }
 
-                    if (string.IsNullOrWhiteSpace(json))
-                    {
-                        continue;
-                    }
-
+                    if (string.IsNullOrWhiteSpace(json)) continue;
+                    
                     // Logging the received IPC message can be useful for debugging, but it may produce a lot of output in production. Uncomment the following line if you want to log received messages.
                     //Console.WriteLine($"Received IPC message: {json}");
 
@@ -218,14 +171,9 @@ namespace GameManager.Shared.Client
                         continue;
                     }
 
-                    if (_pendingRequests.TryRemove(response.RequestId, out TaskCompletionSource<IpcResponse>? responseSource))
-                    {
-                        responseSource.TrySetResult(response);
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Received response for unknown request " + $"{response.RequestId}.");
-                    }
+                    if (_pendingRequests.TryRemove(response.RequestId, out TaskCompletionSource<IpcResponse>? responseSource)) responseSource.TrySetResult(response);
+                    
+                    else Console.WriteLine($"Received response for unknown request " + $"{response.RequestId}.");
                 }
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested){}
@@ -266,11 +214,8 @@ namespace GameManager.Shared.Client
         {
             IpcChildRequest? request = JsonSerializer.Deserialize<IpcChildRequest>(json, JsonOptions);
 
-            if (request is null)
-            {
-                return;
-            }
-
+            if (request is null)return;
+            
             // Useful for debugging, but may produce a lot of output in production. Uncomment the following line if you want to log received child requests.
             //Console.WriteLine($"GameManager request received: " + $"{request.Operation}");
 
@@ -303,10 +248,7 @@ namespace GameManager.Shared.Client
         /// </summary>
         private void FailPendingRequests(Exception exception)
         {
-            foreach (TaskCompletionSource<IpcResponse> source in _pendingRequests.Values)
-            {
-                source.TrySetException(exception);
-            }
+            foreach (TaskCompletionSource<IpcResponse> source in _pendingRequests.Values) source.TrySetException(exception);
             _pendingRequests.Clear();
         }
 
@@ -315,11 +257,8 @@ namespace GameManager.Shared.Client
         /// </summary>
         public async ValueTask DisposeAsync()
         {
-            if (_receiveCts is not null)
-            {
-                _receiveCts.Cancel();
-            }
-
+            if (_receiveCts is not null) _receiveCts.Cancel();
+            
             if (_receiveTask is not null)
             {
                 try
@@ -333,13 +272,9 @@ namespace GameManager.Shared.Client
 
             _reader?.Dispose();
 
-            if (_writer is not null)
-            {
-                await _writer.DisposeAsync();
-            }
-
+            if (_writer is not null) await _writer.DisposeAsync();
+            
             _receiveCts?.Dispose();
-
             _pipe.Dispose();
             _writeLock.Dispose();
         }
@@ -349,11 +284,8 @@ namespace GameManager.Shared.Client
         /// </summary>
         public async Task RegisterAsync(string name, CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                throw new ArgumentException("Child name cannot be empty.", nameof(name));
-            }
-
+            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Child name cannot be empty.", nameof(name));
+            
             IpcRequest request = new()
             {
                 RequestId = Interlocked.Increment(ref _nextRequestId),
@@ -365,10 +297,7 @@ namespace GameManager.Shared.Client
 
             IpcResponse response = await SendRequestAsync(request, cancellationToken);
 
-            if (!response.Success)
-            {
-                throw new GameManagerIpcException(response.Error?.Code ?? "UNKNOWN_ERROR", response.Error?.Message ?? "Child registration failed.");
-            }
+            if (!response.Success) throw new GameManagerIpcException(response.Error?.Code ?? "UNKNOWN_ERROR", response.Error?.Message ?? "Child registration failed.");
         }
     }
 }
