@@ -6,7 +6,7 @@
 
         public string Message { get; init; } = string.Empty;
     }
-    
+
     public static class IpcErrorCodes
     {
         public const string UnknownOperation = "UNKNOWN_OPERATION";

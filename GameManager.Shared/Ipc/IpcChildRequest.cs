@@ -1,13 +1,10 @@
-﻿namespace GameManager.Shared.Ipc
+﻿namespace GameManager.Shared.Ipc;
+
+public sealed class IpcChildRequest
 {
-    public sealed class IpcChildRequest
-    {
-        public long RequestId { get; set; }
+    public long RequestId { get; init; }
 
-        public IpcOperation Operation { get; set; }
+    public IpcOperation Operation { get; init; }
 
-        public string? Resource { get; set; }
-
-        public object? Value { get; set; }
-    }
+    public IpcMessageType MessageType { get; init; } = IpcMessageType.ChildRequest;
 }
