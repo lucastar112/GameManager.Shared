@@ -132,10 +132,7 @@ public sealed class GameManagerClient : IGameManager
     /// Asks the GameManager to send a value from the game's RAM
     /// located at the given resource.
     /// </summary>
-    public async Task<T?> GetAsync<T>(
-        string resource,
-        int? playerId = null,
-        CancellationToken cancellationToken = default)
+    public async Task<T?> GetAsync<T>(string resource, int? playerId = null, CancellationToken cancellationToken = default)
     {
         IpcResponse response =
             await SendRequestAsync(
