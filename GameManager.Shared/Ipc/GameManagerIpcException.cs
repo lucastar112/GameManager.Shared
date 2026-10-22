@@ -4,10 +4,7 @@
     {
         public string Code { get; }
 
-        public GameManagerIpcException(
-            string code,
-            string message)
-            : base(message)
+        public GameManagerIpcException(string code, string message): base(message)
         {
             Code = code;
         }

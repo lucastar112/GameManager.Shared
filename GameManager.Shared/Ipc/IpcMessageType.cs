@@ -1,9 +1,8 @@
-﻿namespace GameManager.Shared.Ipc
+﻿namespace GameManager.Shared.Ipc;
+
+public enum IpcMessageType
 {
-    public enum IpcMessageType
-    {
-        Request,
-        ChildRequest,
-        Response
-    }
+    Request,
+    ChildRequest,
+    Response
 }
