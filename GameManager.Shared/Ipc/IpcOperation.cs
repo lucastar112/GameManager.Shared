@@ -6,6 +6,7 @@ namespace GameManager.Shared.Ipc
         SetResource,
         Ping,
         GetStatus,
-        Register
+        Register,
+        ReloadDynamicCache
     }
 }
