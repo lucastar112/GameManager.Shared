@@ -209,6 +209,10 @@ public sealed class GameManagerClient : IGameManager
 
         request.RequestId = requestId;
 
+        Console.WriteLine(
+    $"[IPC CLIENT] Sending request ID={requestId}, " +
+    $"Operation={request.Operation}, Resource={request.Resource}");
+
         TaskCompletionSource<IpcResponse>
             responseSource =
                 new(
@@ -229,6 +233,14 @@ public sealed class GameManagerClient : IGameManager
                 JsonSerializer.Serialize(
                     request,
                     JsonOptions);
+
+            Console.WriteLine(
+    $"[IPC DEBUG] Sending request ID={requestId}, " +
+    $"Operation={request.Operation}, Resource={request.Resource ?? "<none>"}");
+
+            Console.WriteLine(
+    $"[CLIENT SEND] ID={request.RequestId}, " +
+    $"Operation={request.Operation}, Resource={request.Resource}");
 
             await WriteAsync(
                 requestJson,
@@ -309,6 +321,8 @@ public sealed class GameManagerClient : IGameManager
                 string? json =
                     await _reader.ReadLineAsync(
                         cancellationToken);
+                Console.WriteLine(
+    $"[SERVER RECEIVE] JSON={json}");
 
                 if (json is null)
                 {
@@ -356,11 +370,9 @@ public sealed class GameManagerClient : IGameManager
                         break;
 
                     case IpcMessageType.ChildRequest:
-
-                        _ = HandleChildRequestSafelyAsync(
+                        await HandleChildRequestSafelyAsync(
                             json,
                             cancellationToken);
-
                         break;
 
                     case IpcMessageType.Request:
@@ -501,6 +513,10 @@ public sealed class GameManagerClient : IGameManager
 
             return;
         }
+
+        Console.WriteLine(
+    $"[IPC RESPONSE] RequestId={response.RequestId}, " +
+    $"Pending={_pendingRequests.ContainsKey(response.RequestId)}");
 
         if (_pendingRequests.TryRemove(
                 response.RequestId,
@@ -689,5 +705,23 @@ public sealed class GameManagerClient : IGameManager
 
         Console.WriteLine(
             $"{name} registered with GameManager.");
+    }
+
+    /// <summary>
+    /// Requests that GameManager reload its dynamic resource cache.
+    /// </summary>
+    public async Task ReloadDynamicCacheAsync(
+        CancellationToken cancellationToken = default)
+    {
+        IpcResponse response = await SendRequestAsync(
+            new IpcRequest
+            {
+                MessageType = IpcMessageType.Request,
+                Operation = IpcOperation.ReloadDynamicCache
+            },
+            cancellationToken);
+
+        Console.WriteLine(
+            $"Dynamic cache reload result: {response.Value}");
     }
 }

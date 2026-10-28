@@ -14,6 +14,8 @@
         public const string InvalidResource = "INVALID_RESOURCE";
         public const string InvalidValue = "INVALID_VALUE";
         public const string ResourceUnavailable = "RESOURCE_UNAVAILABLE";
+        public const string ResourceNotReady = "RESOURCE_NOT_READY";
+        public const string InvalidGameState = "INVALID_GAME_STATE";
         public const string ReadFailed = "READ_FAILED";
         public const string WriteFailed = "WRITE_FAILED";
         public const string InternalError = "INTERNAL_ERROR";
