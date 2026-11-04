@@ -212,7 +212,7 @@ public sealed class GameManagerClient : IGameManager
 
         request.RequestId = requestId;
 
-        Console.WriteLine(
+        IpcLog.Debug(
     $"[IPC CLIENT] Sending request ID={requestId}, " +
     $"Operation={request.Operation}, Resource={request.Resource}");
 
@@ -237,11 +237,11 @@ public sealed class GameManagerClient : IGameManager
                     request,
                     JsonOptions);
 
-            Console.WriteLine(
+            IpcLog.Debug(
     $"[IPC DEBUG] Sending request ID={requestId}, " +
     $"Operation={request.Operation}, Resource={request.Resource ?? "<none>"}");
 
-            Console.WriteLine(
+            IpcLog.Debug(
     $"[CLIENT SEND] ID={request.RequestId}, " +
     $"Operation={request.Operation}, Resource={request.Resource}");
 
@@ -324,7 +324,7 @@ public sealed class GameManagerClient : IGameManager
                 string? json =
                     await _reader.ReadLineAsync(
                         cancellationToken);
-                Console.WriteLine(
+                IpcLog.Debug(
     $"[SERVER RECEIVE] JSON={json}");
 
                 if (json is null)
@@ -342,7 +342,7 @@ public sealed class GameManagerClient : IGameManager
                 if (string.IsNullOrWhiteSpace(json))
                     continue;
 
-                Console.WriteLine(
+                IpcLog.Debug(
                     $"Received IPC message: {json}");
 
                 // -------------------------------------------------
@@ -517,7 +517,7 @@ public sealed class GameManagerClient : IGameManager
             return;
         }
 
-        Console.WriteLine(
+        IpcLog.Debug(
     $"[IPC RESPONSE] RequestId={response.RequestId}, " +
     $"Pending={_pendingRequests.ContainsKey(response.RequestId)}");
 
@@ -548,7 +548,7 @@ public sealed class GameManagerClient : IGameManager
     string json,
     CancellationToken cancellationToken)
     {
-        Console.WriteLine(
+        IpcLog.Debug(
             "[GameManagerClient] Handling ChildRequest...");
 
         IpcChildRequest? request =
@@ -564,7 +564,7 @@ public sealed class GameManagerClient : IGameManager
             return;
         }
 
-        Console.WriteLine(
+        IpcLog.Debug(
             $"[GameManagerClient] Child request: " +
             $"{request.Operation}, ID={request.RequestId}");
 
@@ -602,7 +602,7 @@ public sealed class GameManagerClient : IGameManager
                 break;
         }
 
-        Console.WriteLine(
+        IpcLog.Debug(
             $"[GameManagerClient] Sending ChildRequest response " +
             $"ID={response.RequestId}");
 
@@ -612,7 +612,7 @@ public sealed class GameManagerClient : IGameManager
                 JsonOptions),
             cancellationToken);
 
-        Console.WriteLine(
+        IpcLog.Debug(
             $"[GameManagerClient] ChildRequest response sent " +
             $"ID={response.RequestId}");
     }
