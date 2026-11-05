@@ -161,6 +161,39 @@ public sealed class GameManagerClient : IGameManager
     }
 
     // ---------------------------------------------------------
+    // Batched get
+    // ---------------------------------------------------------
+
+    /// <summary>
+    /// Reads many resources with a single IPC round trip. The result has the same
+    /// order as <paramref name="requests"/>; a failed item has Success=false and
+    /// does not fail the others.
+    /// </summary>
+    public async Task<IReadOnlyList<IpcResourceResult>> GetManyAsync(
+        IReadOnlyList<IpcResourceRequest> requests,
+        CancellationToken cancellationToken = default)
+    {
+        IpcResponse response =
+            await SendRequestAsync(
+                new IpcRequest
+                {
+                    MessageType = IpcMessageType.Request,
+                    Operation = IpcOperation.GetResources,
+                    Value = requests
+                },
+                cancellationToken);
+
+        if (response.Value is JsonElement element)
+        {
+            return element.Deserialize<List<IpcResourceResult>>(
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                ?? [];
+        }
+
+        return response.Value as IReadOnlyList<IpcResourceResult> ?? [];
+    }
+
+    // ---------------------------------------------------------
     // Set
     // ---------------------------------------------------------
 

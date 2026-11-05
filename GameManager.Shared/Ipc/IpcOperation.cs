@@ -1,4 +1,4 @@
-namespace GameManager.Shared.Ipc
+﻿namespace GameManager.Shared.Ipc
 {
     public enum IpcOperation
     {
@@ -7,6 +7,7 @@ namespace GameManager.Shared.Ipc
         Ping,
         GetStatus,
         Register,
-        ReloadDynamicCache
+        ReloadDynamicCache,
+        GetResources
     }
 }
